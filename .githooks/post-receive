@@ -1,0 +1,72 @@
+#!/bin/bash
+
+### Instana GitOps Hook: This post-receive Git hook script will trigger an update of configurations of
+### Instana host agents configured with the Git-based configuration management.
+###
+### Installation:
+###
+### 1. Copy this file in as `.git/hooks` in your Git repository
+### 2. Create a `.git/hooks/instana-backend` file, with the following structure:
+###
+### INSTANA_API_ENDPOINT=<required: endpoint of your tenant unit, e.g., https://prod-mycompany.instana.io>
+### INSTANA_API_TOKEN=<required: valid API token with the `Configuration of agents` permission>
+### INSTANA_AGENT_ZONE=<agent zone to match; all agents in this zone that are configured to use Git, will update their configs>
+### INSTANA_AGENT_TAGS=<agents tags to match; all agents that have all these tags and that are configured to use Git, will update their configs>
+###
+### # Either INSTANA_AGENT_ZONE or INSTANA_AGENT_TAGS must be set
+###
+### For more info on the Git-based configuration management for Instana host agents, refer to
+### https://www.instana.com/docs/setup_and_manage/host_agent/configuration/git_ops documentation.
+### For more info on Git Hooks, https://git-scm.com/docs/githooks is an excellent place to start.
+
+if [ -f "${GIT_DIR}/instana-backend" ]; then
+    source "${GIT_DIR}/instana-backend"
+fi
+
+if [ -z "${INSTANA_API_ENDPOINT}" ]; then
+    echo "GitOps update request failed: The required 'INSTANA_API_ENDPOINT' variable is not set in the post-receive hook"
+    exit 0
+fi
+
+if [ -z "${INSTANA_API_TOKEN}" ]; then
+    echo "GitOps update request failed: The required 'INSTANA_API_TOKEN' variable is not set in the post-receive hook"
+    exit 0
+fi
+
+if [ -n "${INSTANA_AGENT_ZONE}" ]; then
+    query="entity.zone:\"${INSTANA_AGENT_ZONE}\""
+fi
+
+if [ -n "${INSTANA_AGENT_TAGS}" ]; then
+    IFS=',' read -r -a tags <<< "${INSTANA_AGENT_TAGS}"
+
+    for tag in "${tags[@]}"
+    do
+        if [ -n "${query}" ]; then
+            query="${query} AND entity.tag:\"${tag}\""
+        else 
+            query="entity.tag:\"${tag}\""
+        fi
+    done
+fi
+
+if [ -z "${query}" ]; then
+    echo "GitOps update request failed: Neither the 'INSTANA_AGENT_ZONE' nor 'INSTANA_AGENT_TAGS' variables have been configured in the post-receive hook"
+    exit 0;
+fi
+
+echo -n "GitOps update: Triggering the configuration update of agents matching the following query: '${query}' ... "
+
+if RESPONSE=$(curl \
+    --location \
+    --silent \
+    --fail \
+    --request POST \
+    --header "authorization: apiToken ${INSTANA_API_TOKEN}" \
+    --write-out "%{http_code}" \
+    "${INSTANA_API_ENDPOINT}/api/host-agent/configuration?query=${query// /%20}")
+then
+    echo "OK"
+else
+    echo "FAILED: The configuration update call to the Instana backend API failed with status code ${RESPONSE}"
+fi

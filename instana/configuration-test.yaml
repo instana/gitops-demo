@@ -1,0 +1,3 @@
+com.instana.plugin.host:
+  tags:
+  - gitops_environment=prod
