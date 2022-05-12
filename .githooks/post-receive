@@ -5,8 +5,8 @@
 ###
 ### Installation:
 ###
-### 1. Copy this file in as `.git/hooks` in your Git repository
-### 2. Create a `.git/hooks/instana-backend` file, with the following structure:
+### 1. Copy this file into the folder `.git/hooks` in your Git repository
+### 2. Create a `.git/instana-backend` file, with the following structure:
 ###
 ### INSTANA_API_ENDPOINT=<required: endpoint of your tenant unit, e.g., https://prod-mycompany.instana.io>
 ### INSTANA_API_TOKEN=<required: valid API token with the `Configuration of agents` permission>
