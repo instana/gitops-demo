@@ -8,7 +8,7 @@ The Git repository you use to store configurations for the Instana host agent sh
 In the large majority of cases, you will likely need to version only files in the `instana/` subfolder, although some settings like repository configurations for advanced update management scenarios will require you to modify files like `mvn-settings.xml` in the root of the repository.
 
 Only the files you version will override existing configurations present in the agent, so feel free to version the minimal amount of configurations you need.
-(At Instana we work really hard to ensure you need to configure anyhow as little ads possible :-) .)
+(At Instana we work really hard to ensure you need to configure anyhow as little as possible :-) .)
 
 ## Git Hooks
 
