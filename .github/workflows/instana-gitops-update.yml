@@ -16,7 +16,7 @@ on:
     paths-ignore:
       - 'renovate.json'
       - 'README.md'
-    branches: [ main ]
+    branches: [ test ]
 
 jobs:
   push-gitops-config:
@@ -27,7 +27,7 @@ jobs:
         with:
           # At least one of 'agent_zone' and 'agent_tags' should be set
           agent_zone: gitops-demo
-          agent_tags: gitops_environment=prod
+          agent_tags: gitops_environment=test
         env:
           INSTANA_API_ENDPOINT: ${{ secrets.INSTANA_API_ENDPOINT }}
           INSTANA_API_TOKEN: ${{ secrets.INSTANA_API_TOKEN }}
