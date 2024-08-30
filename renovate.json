@@ -1,0 +1,15 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":dependencyDashboard"],
+  "baseBranches": ["test"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["instana/com.instana.agent.bootstrap.AgentBootstrap.cfg"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.*?))(?: versioning=(?<versioning>[a-z-]+?))?\\sversion\\s=\\s(?<currentValue>.+?)\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ]
+}

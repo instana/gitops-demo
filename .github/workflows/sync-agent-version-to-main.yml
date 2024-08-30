@@ -1,0 +1,66 @@
+# This workflow is used to create a PR with the existing agent version from the test branch to main
+
+name: Sync Agent Version to main
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "test" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  open-pr:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Runs a set of commands using the runners shell
+      - name: Copy AgentBootrap to main
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "Showing content of current AgentBootstrap"
+          cat instana/com.instana.agent.bootstrap.AgentBootstrap.cfg
+          rm -f /tmp/com.instana.agent.bootstrap.AgentBootstrap.cfg
+          echo "Create temporary copy of the configuration file"
+          cp instana/com.instana.agent.bootstrap.AgentBootstrap.cfg /tmp/
+          echo "Checking out main branch"
+          git fetch origin main
+          git checkout main
+          echo "Creating new branch from main"
+          git checkout -b promote-test-to-main
+          echo "Replace config file on main"
+          rm -f instana/com.instana.agent.bootstrap.AgentBootstrap.cfg
+          cp -f /tmp/com.instana.agent.bootstrap.AgentBootstrap.cfg instana/com.instana.agent.bootstrap.AgentBootstrap.cfg
+          echo "Check if file was changed"
+          if [[ `git status --porcelain` ]]; then
+            echo "The file has changed, continue to commit and push"
+          else
+            echo "The file is unchanged, main is already in sync with test branch, no further action needed"
+            exit 0
+          fi
+          
+          echo "Setting git author"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          echo "Commiting change"
+          git add instana/com.instana.agent.bootstrap.AgentBootstrap.cfg
+          git commit -m "chore: Sync AgentBootstrap from current test branch"
+          echo "Push change to feature branch"
+          git push origin -f promote-test-to-main
+          UPDATED_VERSION=$(cat instana/com.instana.agent.bootstrap.AgentBootstrap.cfg  | grep "version = " | grep -v "#" | cut -c11-)
+          PR_TITLE="chore(deps): Update Instana Agent Production to v${UPDATED_VERSION}"
+          echo "Automated sync of instana/com.instana.agent.bootstrap.AgentBootstrap.cfg from branch \"test\" to \"main\"." > body-file.txt
+          echo "Make sure that the test environment works as expected before approving and merging the change." >> body-file.txt
+          echo "Merging will **trigger an production update including an agent restart**." >> body-file.txt
+          echo "" >> body-file.txt
+          echo "This update was driven by [this GitHub Action Workflow](https://github.com/instana/gitops-demo/blob/test/.github/workflows/sync-agent-version-to-main.yml)." >> body-file.txt
+          echo "Available Instana Agent tags can be found on the [instana/agent-updates](https://github.com/instana/agent-updates/tags) repository." >> body-file.txt
+          gh pr create -B main --title "${PR_TITLE}" --body-file "body-file.txt" --label "production" || \
+          gh pr edit -B main --title "${PR_TITLE}" --body-file "body-file.txt" --add-label "production"
