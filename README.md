@@ -35,13 +35,16 @@ Change files in the [instana](./instana) folder to match the new target environm
 
 To be able to run the GitHub Actions Workflows, define credentials for the Instana backend and a GitHub personal access token.
 
-To generate an Instana backend token, login into the Instana UI and navigate to `Settings > User Settings > Personal API Tokens > New Personal API Token` and save the generated token.
+To generate an Instana backend token, login into the Instana UI and navigate to `Settings > Team Settings > API Tokens > New API Token` and select the `Configuration of agents` permission and `Save`.
 
-The GitHub workflow which promotes changes from the `test` branch to `main` requires access to the GitHub repository via GitHub Personal Access Token which can be generated in [New fine-grained personal access token](https://github.com/settings/personal-access-tokens/new)
+![](./images/generate-api-token-instana-backend.png)
+
+The GitHub workflow which promotes changes from the `test` branch to `main` requires access to the GitHub repository via GitHub Personal Access Token which can be generated in GitHub's Developer Settings > [New personal access token (classic)](https://github.com/settings/tokens/new).
 The access token requires permission on the forked repository and the following repository permissions:
 
-- Read access to metadata
-- Read and Write access to pull requests
+- repo > public repo
+
+If the repository is not public, permission to access a private repository is also required.
 
 In the GitHub settings of the gitops repository navigate to `Secrets and variables > Actions` and define the following entries as repository secrets:
 
