@@ -9,7 +9,7 @@
 ### For more information on the Instana GitHub action for GitOps update, refer to:
 ### https://github.com/instana/github-action-update-agent-configurations
 
-name: Instana GitOps update - Prod
+name: Instana GitOps update - Test
 
 on:
   push:
