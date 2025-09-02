@@ -1,0 +1,16 @@
+apiVersion: instana.io/v1
+kind: InstanaAgent
+metadata:
+  name: instana-agent
+  namespace: instana-agent
+spec:
+  cluster:
+   name: my-dev-cluster
+  agent:
+   keysSecret: instana-agent-key
+   endpointHost: ingress-red-saas.instana.io
+   endpointPort: "443"
+   env:
+    INSTANA_AGENT_UPDATES_VERSION: 2024.10.28.1344 # check for available versions at https://github.com/instana/agent-updates/tags 
+    # INSTANA_AGENT_UPDATES_TIME: 4:30 # no effect when version is pinned with INSTANA_AGENT_UPDATES_VERSION
+    # INSTANA_AGENT_UPDATES_FREQUENCY: DAY # no effect when version is pinned with INSTANA_AGENT_UPDATES_VERSION
