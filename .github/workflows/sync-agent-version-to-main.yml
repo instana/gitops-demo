@@ -27,36 +27,58 @@ jobs:
         run: |
           echo "Showing content of current AgentBootstrap"
           cat instana/com.instana.agent.bootstrap.AgentBootstrap.cfg
+
+          # Clean up any existing temp files
           rm -f /tmp/com.instana.agent.bootstrap.AgentBootstrap.cfg
-          echo "Create temporary copy of the configuration file"
+          rm -f /tmp/values.yaml
+          rm -f /tmp/instana-agent.customresource.yaml
+
+          # Copy all relevant files to temp directory
+          echo "Create temporary copies of the configuration files"
           cp instana/com.instana.agent.bootstrap.AgentBootstrap.cfg /tmp/
+          cp kubernetes/instana/helm-chart/dynamic-agent/values.yaml /tmp/values.yaml
+          cp kubernetes/instana/instana-agent-operator/dynamic-agent/instana-agent.customresource.yaml /tmp/instana-agent.customresource.yaml
+
           echo "Checking out main branch"
           git fetch origin main
           git checkout main
           echo "Creating new branch from main"
           git checkout -b promote-test-to-main
-          echo "Replace config file on main"
+
+          echo "Replace config files on main"
           rm -f instana/com.instana.agent.bootstrap.AgentBootstrap.cfg
+          rm -f kubernetes/instana/helm-chart/dynamic-agent/values.yaml
+          rm -f kubernetes/instana/instana-agent-operator/dynamic-agent/instana-agent.customresource.yaml
+
           cp -f /tmp/com.instana.agent.bootstrap.AgentBootstrap.cfg instana/com.instana.agent.bootstrap.AgentBootstrap.cfg
-          echo "Check if file was changed"
+          cp -f /tmp/values.yaml kubernetes/instana/helm-chart/dynamic-agent/values.yaml
+          cp -f /tmp/instana-agent.customresource.yaml kubernetes/instana/instana-agent-operator/dynamic-agent/instana-agent.customresource.yaml
+
+          echo "Check if files were changed"
           if [[ `git status --porcelain` ]]; then
-            echo "The file has changed, continue to commit and push"
+            echo "Files have changed, continue to commit and push"
           else
-            echo "The file is unchanged, main is already in sync with test branch, no further action needed"
+            echo "Files are unchanged, main is already in sync with test branch, no further action needed"
             exit 0
           fi
           
           echo "Setting git author"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config --global user.name "${GITHUB_ACTOR}"
-          echo "Commiting change"
+          echo "Commiting changes"
           git add instana/com.instana.agent.bootstrap.AgentBootstrap.cfg
-          git commit -m "chore: Sync AgentBootstrap from current test branch"
+          git add kubernetes/instana/helm-chart/dynamic-agent/values.yaml
+          git add kubernetes/instana/instana-agent-operator/dynamic-agent/instana-agent.customresource.yaml
+          git commit -m "chore: Sync Instana agent configurations from current test branch"
           echo "Push change to feature branch"
           git push origin -f promote-test-to-main
           UPDATED_VERSION=$(cat instana/com.instana.agent.bootstrap.AgentBootstrap.cfg  | grep "version = " | grep -v "#" | cut -c11-)
           PR_TITLE="chore(deps): Update Instana Agent Production to v${UPDATED_VERSION}"
-          echo "Automated sync of instana/com.instana.agent.bootstrap.AgentBootstrap.cfg from branch \"test\" to \"main\"." > body-file.txt
+          echo "Automated sync of Instana agent configurations from branch \"test\" to \"main\"." > body-file.txt
+          echo "Files updated:" >> body-file.txt
+          echo "- instana/com.instana.agent.bootstrap.AgentBootstrap.cfg" >> body-file.txt
+          echo "- kubernetes/instana/helm-chart/dynamic-agent/values.yaml" >> body-file.txt
+          echo "- kubernetes/instana/instana-agent-operator/dynamic-agent/instana-agent.customresource.yaml" >> body-file.txt
           echo "Make sure that the test environment works as expected before approving and merging the change." >> body-file.txt
           echo "Merging will **trigger an production update including an agent restart**." >> body-file.txt
           echo "" >> body-file.txt

@@ -11,6 +11,9 @@ spec:
    endpointHost: ingress-red-saas.instana.io
    endpointPort: "443"
    env:
-    INSTANA_AGENT_UPDATES_VERSION: 2024.10.28.1344 # check for available versions at https://github.com/instana/agent-updates/tags 
+    # This field specifies which version set of components should be used by the agent;
+    # its value must be a valid tag from https://github.com/instana/agent-updates/tags
+    # renovate: datasource=github-tags depName=instana/agent-updates versioning=loose
+    INSTANA_AGENT_UPDATES_VERSION: 2024.10.28.1344
     # INSTANA_AGENT_UPDATES_TIME: 4:30 # no effect when version is pinned with INSTANA_AGENT_UPDATES_VERSION
     # INSTANA_AGENT_UPDATES_FREQUENCY: DAY # no effect when version is pinned with INSTANA_AGENT_UPDATES_VERSION
