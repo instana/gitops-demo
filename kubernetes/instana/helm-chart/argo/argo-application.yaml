@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: instana-agent
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://agents.instana.io/helm
+      chart: 'instana-agent'
+      targetRevision: '>=1.0.0'
+      helm:
+        valueFiles:
+        - $values/kubernetes/instana/helm-chart/dynamic-agent/values.yaml # full path to values.yaml
+    - repoURL: https://github.ibm.com/instana/gitops-demo.git # updated repo URL
+      targetRevision: "main" # the branch you'd like to apply to cluster
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: instana-agent # change if you have a custom instana-agent namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

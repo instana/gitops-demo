@@ -10,6 +10,17 @@ In the large majority of cases, you will likely need to version only files in th
 Only the files you version will override existing configurations present in the agent, so feel free to version the minimal amount of configurations you need.
 (At Instana we work really hard to ensure you need to configure anyhow as little as possible :-) .)
 
+### Directory Structure
+
+This repository contains the following key directories:
+
+- [instana/](./instana) - Contains host agent configuration files for Git-based Configuration Management capabilities
+- [kubernetes/instana/](./kubernetes/instana/) - Contains Kubernetes agent configuration with ArgoCD pinning
+  - [helm-chart](./kubernetes/instana/helm-chart/)- Helm chart configuration for Instana agent
+  - [instana-agent-operator](./kubernetes/instana/instana-agent-operator/) - Operator-based installation configuration for Instana agent
+
+For detailed information about Kubernetes agent version pinning with ArgoCD, see the [kubernetes/README.md](kubernetes/README.md).
+
 ## Git Hooks
 
 The [.githooks/post-receive](.githooks/post-receive) file provides you a sample of how to configure your Git repository so that, when a branch is updated, it will notify the Instana backend that some Git-enabled agents should update their configurations.

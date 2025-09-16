@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: instana-agent-operator-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.ibm.com/instana/gitops-demo # updated repo URL
+    targetRevision: main # the branch you'd like to apply to cluster 
+    path: 'kubernetes/instana/instana-agent-operator/dynamic-agent' # updated path to the file in the repo
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: instana-agent
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
