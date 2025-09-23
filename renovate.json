@@ -10,6 +10,17 @@
         "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.*?))(?: versioning=(?<versioning>[a-z-]+?))?\\sversion\\s=\\s(?<currentValue>.+?)\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "kubernetes/instana/helm-chart/dynamic-agent/values.yaml",
+        "kubernetes/instana/instana-agent-operator/dynamic-agent/instana-agent.customresource.yaml"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.*?))(?: versioning=(?<versioning>[a-z-]+?))?\\s+INSTANA_AGENT_UPDATES_VERSION:\\s+(?<currentValue>.+?)\\s+"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
   ]
 }
